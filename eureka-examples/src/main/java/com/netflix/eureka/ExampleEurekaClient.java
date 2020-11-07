@@ -20,8 +20,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 import com.netflix.appinfo.ApplicationInfoManager;
@@ -63,6 +65,23 @@ public class ExampleEurekaClient {
         return eurekaClient;
     }
 
+    public static void injectEurekaConfiguration() throws UnknownHostException {
+        String myHostName = InetAddress.getLocalHost().getHostName();
+        String myServiceUrl = "http://" + myHostName + ":8080/v2/";
+
+        System.setProperty("eureka.region", "default");
+        System.setProperty("eureka.name", "eureka");
+        System.setProperty("eureka.vipAddress", "eureka.mydomain.net.server");
+        System.setProperty("eureka.port", "8081");
+        System.setProperty("eureka.preferSameZone", "false");
+        System.setProperty("eureka.shouldUseDns", "false");
+        System.setProperty("eureka.shouldFetchRegistry", "false");
+        System.setProperty("eureka.serviceUrl.defaultZone", myServiceUrl);
+        System.setProperty("eureka.serviceUrl.default.defaultZone", myServiceUrl);
+        System.setProperty("eureka.awsAccessId", "fake_aws_access_id");
+        System.setProperty("eureka.awsSecretKey", "fake_aws_secret_key");
+        System.setProperty("eureka.numberRegistrySyncRetries", "0");
+    }
 
     public void sendRequestToServiceUsingEureka(EurekaClient eurekaClient) {
         // initialize the client
@@ -115,18 +134,27 @@ public class ExampleEurekaClient {
     }
 
     public static void main(String[] args) {
-        ExampleEurekaClient sampleClient = new ExampleEurekaClient();
+//        try {
+//            injectEurekaConfiguration();
+//        } catch (UnknownHostException e) {
+//            e.printStackTrace();
+//        }
+        try{
+            ExampleEurekaClient sampleClient = new ExampleEurekaClient();
 
-        // create the client
-        ApplicationInfoManager applicationInfoManager = initializeApplicationInfoManager(new MyDataCenterInstanceConfig());
-        EurekaClient client = initializeEurekaClient(applicationInfoManager, new DefaultEurekaClientConfig());
+            // create the client
+            ApplicationInfoManager applicationInfoManager = initializeApplicationInfoManager(new MyDataCenterInstanceConfig());
+            EurekaClient client = initializeEurekaClient(applicationInfoManager, new DefaultEurekaClientConfig());
 
-        // use the client
-        sampleClient.sendRequestToServiceUsingEureka(client);
+            // use the client
+            sampleClient.sendRequestToServiceUsingEureka(client);
 
 
-        // shutdown the client
-        eurekaClient.shutdown();
+            // shutdown the client
+            eurekaClient.shutdown();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

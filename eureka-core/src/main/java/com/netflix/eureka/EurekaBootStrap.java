@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * <em>eureka.client.props</em>. If the server runs in the AWS cloud, the eureka
  * server binds it to the elastic ip as specified.
  * </p>
- *
+ * 初始化 Eureka-Server
  * @author Karthik Ranganathan, Greg Kim, David Liu
  *
  */
@@ -110,7 +110,9 @@ public class EurekaBootStrap implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
         try {
+            // 初始化 Eureka-Server 配置环境
             initEurekaEnvironment();
+            // 初始化 Eureka-Server 上下文
             initEurekaServerContext();
 
             ServletContext sc = event.getServletContext();
@@ -148,6 +150,7 @@ public class EurekaBootStrap implements ServletContextListener {
         EurekaServerConfig eurekaServerConfig = new DefaultEurekaServerConfig();
 
         // For backward compatibility
+        // 目前 Eureka-Server 提供 V2 版本 API ，如上代码主要对 V1 版本 API 做兼容。可以选择跳过。
         JsonXStream.getInstance().registerConverter(new V1AwareInstanceInfoConverter(), XStream.PRIORITY_VERY_HIGH);
         XmlXStream.getInstance().registerConverter(new V1AwareInstanceInfoConverter(), XStream.PRIORITY_VERY_HIGH);
 
@@ -205,17 +208,19 @@ public class EurekaBootStrap implements ServletContextListener {
                 peerEurekaNodes,
                 applicationInfoManager
         );
-
+        // 初始化 EurekaServerContextHolder
         EurekaServerContextHolder.initialize(serverContext);
 
         serverContext.initialize();
         logger.info("Initialized server context");
 
         // Copy registry from neighboring eureka node
+        // 从其他 Eureka-Server 拉取注册信息
         int registryCount = registry.syncUp();
         registry.openForTraffic(applicationInfoManager, registryCount);
 
         // Register all monitoring statistics.
+        // 注册所有监视统计信息。
         EurekaMonitors.registerAllStats();
     }
     

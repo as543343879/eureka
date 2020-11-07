@@ -116,6 +116,8 @@ public interface EurekaInstanceConfig {
      * instance.
      *
      * <p>
+     * 租约续约频率，单位：秒
+     * 应用不断通过按照该频率发送心跳给 Eureka-Server 以达到续约的作用。当 Eureka-Server 超过最大频率未收到续约（心跳），契约失效，进行应用移除。应用移除后，其他应用无法从 Eureka-Server 获取该应用
      * Note that the instance could still not take traffic if it implements
      * {@link HealthCheckCallback} and then decides to make itself unavailable.
      * </p>
@@ -136,6 +138,7 @@ public interface EurekaInstanceConfig {
      * temporary network glitches.This value to be set to atleast higher than
      * the value specified in {@link #getLeaseRenewalIntervalInSeconds()}
      * .
+     * 契约过期时间，单位：秒。
      * </p>
      *
      * @return value indicating time in seconds.
@@ -368,6 +371,7 @@ public interface EurekaInstanceConfig {
     String[] getDefaultAddressResolutionOrder();
 
     /**
+     * 配置命名空间，默认使用 eureka
      * Get the namespace used to find properties.
      * @return the namespace used to find properties.
      */

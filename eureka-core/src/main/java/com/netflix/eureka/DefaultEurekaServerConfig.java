@@ -74,7 +74,9 @@ public class DefaultEurekaServerConfig implements EurekaServerConfig {
             .getInstance().getStringProperty("eureka.server.props",
                     "eureka-server");
     private static final int TIME_TO_WAIT_FOR_REPLICATION = 30000;
-
+    /**
+     * 命名空间
+     */
     private String namespace = "eureka.";
 
     // These counters are checked for each HTTP request. Instantiating them per request like for the other

@@ -141,7 +141,9 @@ public class DiscoveryClient implements EurekaClient {
      */
     private final ScheduledExecutorService scheduler;
     // additional executors for supervised subtasks
+    // 心跳执行器
     private final ThreadPoolExecutor heartbeatExecutor;
+    //  刷新执行器
     private final ThreadPoolExecutor cacheRefreshExecutor;
 
     private final Provider<HealthCheckHandler> healthCheckHandlerProvider;
@@ -267,6 +269,7 @@ public class DiscoveryClient implements EurekaClient {
 
     public DiscoveryClient(ApplicationInfoManager applicationInfoManager, final EurekaClientConfig config, AbstractDiscoveryClientOptionalArgs args) {
         this(applicationInfoManager, config, args, new Provider<BackupRegistry>() {
+            // 备份注册中心接口。当 Eureka-Client 启动时，无法从 Eureka-Server 读取注册信息（可能挂了），从备份注册中心读取注册信息
             private volatile BackupRegistry backupRegistryInstance;
 
             @Override
