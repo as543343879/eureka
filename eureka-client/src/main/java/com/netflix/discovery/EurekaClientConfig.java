@@ -23,6 +23,7 @@ import com.google.inject.ImplementedBy;
 import com.netflix.discovery.shared.transport.EurekaTransportConfig;
 
 /**
+ * erurea 配置 注册相关信息
  * Configuration information required by the eureka clients to register an
  * instance with <em>Eureka</em> server.
  *

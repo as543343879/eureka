@@ -1,14 +1,5 @@
 package com.netflix.eureka.resources;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.InstanceInfo.InstanceStatus;
 import com.netflix.discovery.shared.resolver.DefaultEndpoint;
@@ -25,16 +16,22 @@ import com.netflix.eureka.cluster.protocol.ReplicationListResponse;
 import com.netflix.eureka.registry.PeerAwareInstanceRegistryImpl.Action;
 import com.netflix.eureka.transport.JerseyReplicationClient;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.NoJspServlet;
+import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -46,7 +43,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Tomasz Bak
  */
-public class EurekaClientServerRestIntegrationTest {
+public class EurekaClientServerRestIntegrationTestBase {
 
     private static final String[] EUREKA1_WAR_DIRS = {"build/libs", "eureka-server/build/libs"};
 
@@ -237,17 +234,27 @@ public class EurekaClientServerRestIntegrationTest {
     }
 
     private static void startServer() throws Exception {
-        File warFile = findWar();
+//        File warFile = findWar();
+//
+//        server = new Server(8080);
+//
+//        WebAppContext webapp = new WebAppContext();
+//        webapp.setContextPath("/");
+//        webapp.setWar(warFile.getAbsolutePath());
+//        server.setHandler(webapp);
+//
+//        server.start();
+        server = new Server(8081);
 
-        server = new Server(8080);
+        // TODO Thread.currentThread().getContextClassLoader() 获取不到路径，先暂时这样；
+        WebAppContext webAppCtx = new WebAppContext(new File("./eureka-server/src/main/webapp").getAbsolutePath(), "/");
+        webAppCtx.setDescriptor(new File("./eureka-server/src/main/webapp/WEB-INF/web.xml").getAbsolutePath());
+        webAppCtx.setResourceBase(new File("./eureka-server/src/main/resources").getAbsolutePath());
+        webAppCtx.setClassLoader(Thread.currentThread().getContextClassLoader());
+        server.setHandler(webAppCtx);
 
-        WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath("/");
-        webapp.setWar(warFile.getAbsolutePath());
-        server.setHandler(webapp);
-
+//        server.setHandler(handler);
         server.start();
-
         eurekaServiceUrl = "http://localhost:8080/v2";
     }
 

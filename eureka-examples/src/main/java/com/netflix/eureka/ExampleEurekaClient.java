@@ -71,22 +71,22 @@ public class ExampleEurekaClient {
 
         System.setProperty("eureka.region", "default");
         System.setProperty("eureka.name", "eureka");
-        System.setProperty("eureka.vipAddress", "eureka.mydomain.net.server");
+//        System.setProperty("eureka.vipAddress", "eureka.mydomain.net.server");
         System.setProperty("eureka.port", "8081");
-        System.setProperty("eureka.preferSameZone", "false");
-        System.setProperty("eureka.shouldUseDns", "false");
-        System.setProperty("eureka.shouldFetchRegistry", "false");
+//        System.setProperty("eureka.preferSameZone", "false");
+//        System.setProperty("eureka.shouldUseDns", "false");
+//        System.setProperty("eureka.shouldFetchRegistry", "false");
         System.setProperty("eureka.serviceUrl.defaultZone", myServiceUrl);
         System.setProperty("eureka.serviceUrl.default.defaultZone", myServiceUrl);
-        System.setProperty("eureka.awsAccessId", "fake_aws_access_id");
-        System.setProperty("eureka.awsSecretKey", "fake_aws_secret_key");
-        System.setProperty("eureka.numberRegistrySyncRetries", "0");
+//        System.setProperty("eureka.awsAccessId", "fake_aws_access_id");
+//        System.setProperty("eureka.awsSecretKey", "fake_aws_secret_key");
+//        System.setProperty("eureka.numberRegistrySyncRetries", "0");
     }
 
     public void sendRequestToServiceUsingEureka(EurekaClient eurekaClient) {
         // initialize the client
         // this is the vip address for the example service to talk to as defined in conf/sample-eureka-service.properties
-        String vipAddress = "sampleservice.mydomain.net";
+        String vipAddress = "localhost";
 
         InstanceInfo nextServerInfo = null;
         try {
@@ -134,11 +134,11 @@ public class ExampleEurekaClient {
     }
 
     public static void main(String[] args) {
-//        try {
-//            injectEurekaConfiguration();
-//        } catch (UnknownHostException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            injectEurekaConfiguration();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
         try{
             ExampleEurekaClient sampleClient = new ExampleEurekaClient();
 
@@ -151,7 +151,7 @@ public class ExampleEurekaClient {
 
 
             // shutdown the client
-            eurekaClient.shutdown();
+//            eurekaClient.shutdown();
         }catch (Exception e) {
             e.printStackTrace();
         }

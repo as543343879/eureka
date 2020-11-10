@@ -20,6 +20,7 @@ import java.util.Map;
 import com.google.inject.ImplementedBy;
 
 /**
+ * eureka 配置信息
  * Configuration information required by the instance to register with Eureka
  * server. Once registered, users can look up information from
  * {@link com.netflix.discovery.EurekaClient} based on virtual hostname (also called VIPAddress),
