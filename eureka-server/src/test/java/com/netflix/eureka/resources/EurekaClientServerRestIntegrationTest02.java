@@ -16,7 +16,6 @@ import com.netflix.eureka.cluster.protocol.ReplicationListResponse;
 import com.netflix.eureka.registry.PeerAwareInstanceRegistryImpl.Action;
 import com.netflix.eureka.transport.JerseyReplicationClient;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -43,7 +42,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Tomasz Bak
  */
-public class EurekaClientServerRestIntegrationTestBase {
+public class EurekaClientServerRestIntegrationTest02 {
 
     private static final String[] EUREKA1_WAR_DIRS = {"build/libs", "eureka-server/build/libs"};
 
@@ -88,12 +87,13 @@ public class EurekaClientServerRestIntegrationTestBase {
                 serverCodecs,
                 eurekaServiceUrl
         );
+        Thread.sleep(Long.MAX_VALUE);
 
     }
 
     @AfterClass
     public static void tearDown() throws Exception {
-        Thread.sleep(Long.MAX_VALUE);
+
         removeEurekaConfiguration();
         if (jerseyReplicationClient != null) {
             jerseyReplicationClient.shutdown();
@@ -212,11 +212,11 @@ public class EurekaClientServerRestIntegrationTestBase {
     private static void injectEurekaConfiguration() throws UnknownHostException {
         String myHostName = InetAddress.getLocalHost().getHostName();
         String myServiceUrl = "http://" + myHostName + ":8080/v2/";
-
+        myServiceUrl = "http://127.0.0.1:8080/v2/" + "," + "http://127.0.0.1:8081/v2/";
         System.setProperty("eureka.region", "default");
         System.setProperty("eureka.name", "eureka");
 //        System.setProperty("eureka.vipAddress", "eureka.mydomain.net");
-        System.setProperty("eureka.port", "8080");
+        System.setProperty("eureka.port", "8081");
         System.setProperty("eureka.preferSameZone", "false");
         System.setProperty("eureka.shouldUseDns", "false");
         System.setProperty("eureka.shouldFetchRegistry", "false");
@@ -234,29 +234,18 @@ public class EurekaClientServerRestIntegrationTestBase {
     }
 
     private static void startServer() throws Exception {
-//        File warFile = findWar();
-//
-//        server = new Server(8080);
-//
-//        WebAppContext webapp = new WebAppContext();
-//        webapp.setContextPath("/");
-//        webapp.setWar(warFile.getAbsolutePath());
-//        server.setHandler(webapp);
-//
-//        server.start();
-        server = new Server(8080);
+        File warFile = findWar();
 
-        // TODO Thread.currentThread().getContextClassLoader() 获取不到路径，先暂时这样；
-        WebAppContext webAppCtx = new WebAppContext(new File("./eureka-server/src/main/webapp").getAbsolutePath(), "/");
-        webAppCtx.setContextPath("/");
-        webAppCtx.setDescriptor(new File("./eureka-server/src/main/webapp/WEB-INF/web.xml").getAbsolutePath());
-        webAppCtx.setResourceBase(new File("./eureka-server/src/main/resources").getAbsolutePath());
-        webAppCtx.setClassLoader(Thread.currentThread().getContextClassLoader());
-        server.setHandler(webAppCtx);
+        server = new Server(8081);
 
-//        server.setHandler(handler);
+        WebAppContext webapp = new WebAppContext();
+        webapp.setContextPath("/");
+        webapp.setWar(warFile.getAbsolutePath());
+        server.setHandler(webapp);
+
         server.start();
-        eurekaServiceUrl = "http://localhost:8080/v2";
+
+        eurekaServiceUrl = "http://localhost:8081/v2";
     }
 
     private static File findWar() {

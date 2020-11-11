@@ -35,16 +35,20 @@ import org.slf4j.LoggerFactory;
 public class PeerEurekaNodes {
 
     private static final Logger logger = LoggerFactory.getLogger(PeerEurekaNodes.class);
-
+    // 应用实例注册表
     protected final PeerAwareInstanceRegistry registry;
+    // Eureka-Server 配置
     protected final EurekaServerConfig serverConfig;
     protected final EurekaClientConfig clientConfig;
+    // Eureka-Server 编解码
     protected final ServerCodecs serverCodecs;
+    // 应用实例信息管理器
     private final ApplicationInfoManager applicationInfoManager;
-
+    // Eureka-Server 集群节点数组
     private volatile List<PeerEurekaNode> peerEurekaNodes = Collections.emptyList();
+    // Eureka-Server 服务地址数组
     private volatile Set<String> peerEurekaNodeUrls = Collections.emptySet();
-
+    // 定时任务服务
     private ScheduledExecutorService taskExecutor;
 
     @Inject
@@ -74,6 +78,7 @@ public class PeerEurekaNodes {
     }
 
     public void start() {
+        // 创建 定时任务服务
         taskExecutor = Executors.newSingleThreadScheduledExecutor(
                 new ThreadFactory() {
                     @Override
@@ -85,7 +90,9 @@ public class PeerEurekaNodes {
                 }
         );
         try {
+            //初始化 集群节点信息
             updatePeerEurekaNodes(resolvePeerUrls());
+
             Runnable peersUpdateTask = new Runnable() {
                 @Override
                 public void run() {
@@ -97,6 +104,7 @@ public class PeerEurekaNodes {
 
                 }
             };
+            //  初始化 初始化固定周期更新集群节点信息的任务
             taskExecutor.scheduleWithFixedDelay(
                     peersUpdateTask,
                     serverConfig.getPeerEurekaNodesUpdateIntervalMs(),
@@ -106,6 +114,7 @@ public class PeerEurekaNodes {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+        //   打印 集群节点信息
         for (PeerEurekaNode node : peerEurekaNodes) {
             logger.info("Replica node URL:  {}", node.getServiceUrl());
         }
@@ -146,6 +155,7 @@ public class PeerEurekaNodes {
     }
 
     /**
+     * 更新集群节点信息 删除 关闭的，添加新加的
      * Given new set of replica URLs, destroy {@link PeerEurekaNode}s no longer available, and
      * create new ones.
      *
@@ -156,7 +166,6 @@ public class PeerEurekaNodes {
             logger.warn("The replica size seems to be empty. Check the route 53 DNS Registry");
             return;
         }
-
         Set<String> toShutdown = new HashSet<>(peerEurekaNodeUrls);
         toShutdown.removeAll(newPeerUrls);
         Set<String> toAdd = new HashSet<>(newPeerUrls);

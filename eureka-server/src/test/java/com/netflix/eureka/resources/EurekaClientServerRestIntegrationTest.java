@@ -215,7 +215,7 @@ public class EurekaClientServerRestIntegrationTest {
     private static void injectEurekaConfiguration() throws UnknownHostException {
         String myHostName = InetAddress.getLocalHost().getHostName();
         String myServiceUrl = "http://" + myHostName + ":8080/v2/";
-
+	    myServiceUrl = "http://127.0.0.1:8080/v2/" + "," + "http://127.0.0.1:8081/v2/";
         System.setProperty("eureka.region", "default");
         System.setProperty("eureka.name", "eureka");
 //        System.setProperty("eureka.vipAddress", "eureka.mydomain.net");
@@ -223,6 +223,7 @@ public class EurekaClientServerRestIntegrationTest {
         System.setProperty("eureka.preferSameZone", "false");
         System.setProperty("eureka.shouldUseDns", "false");
         System.setProperty("eureka.shouldFetchRegistry", "false");
+
         System.setProperty("eureka.serviceUrl.defaultZone", myServiceUrl);
         System.setProperty("eureka.serviceUrl.default.defaultZone", myServiceUrl);
         System.setProperty("eureka.awsAccessId", "fake_aws_access_id");

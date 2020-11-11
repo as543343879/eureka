@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * 表示一个对等节点，应从该节点共享信息
  * The <code>PeerEurekaNode</code> represents a peer node to which information
  * should be shared from this node.
  *

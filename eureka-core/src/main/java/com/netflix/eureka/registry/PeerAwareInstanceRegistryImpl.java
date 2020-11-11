@@ -61,6 +61,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
+ * 处理将所有操作复制到 AbstractInstanceRegistry到对等Eureka节点，以使其保持同步。
  * Handles replication of all operations to {@link AbstractInstanceRegistry} to peer
  * <em>Eureka</em> nodes to keep them all in sync.
  *
@@ -375,10 +376,12 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     public boolean cancel(final String appName, final String id,
                           final boolean isReplication) {
         if (super.cancel(appName, id, isReplication)) {
+            // 将所有eureka操作复制到对等eureka节点
             replicateToPeers(Action.Cancel, appName, id, null, null, isReplication);
             synchronized (lock) {
                 if (this.expectedNumberOfClientsSendingRenews > 0) {
                     // Since the client wants to cancel it, reduce the number of clients to send renews
+                    //  由于客户端想要取消它，因此减少发送续订的客户端数量
                     this.expectedNumberOfClientsSendingRenews = this.expectedNumberOfClientsSendingRenews - 1;
                     updateRenewsPerMinThreshold();
                 }
@@ -401,11 +404,15 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
      */
     @Override
     public void register(final InstanceInfo info, final boolean isReplication) {
+        // // 租约过期时间 默认90s
         int leaseDuration = Lease.DEFAULT_DURATION_IN_SECS;
+        // 客户端有配置过期时间 并且大于0  用客户端自己配置的
         if (info.getLeaseInfo() != null && info.getLeaseInfo().getDurationInSecs() > 0) {
             leaseDuration = info.getLeaseInfo().getDurationInSecs();
         }
+        //注册应用实例信息
         super.register(info, leaseDuration, isReplication);
+        //Eureka-Server 复制
         replicateToPeers(Action.Register, info.getAppName(), info.getId(), info, null, isReplication);
     }
 
@@ -417,6 +424,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
      */
     public boolean renew(final String appName, final String id, final boolean isReplication) {
         if (super.renew(appName, id, isReplication)) {
+            // 将所有eureka操作复制到对等eureka节点
             replicateToPeers(Action.Heartbeat, appName, id, null, null, isReplication);
             return true;
         }
@@ -609,6 +617,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     }
 
     /**
+     * 将所有eureka操作复制到对等eureka节点
      * Replicates all eureka actions to peer eureka nodes except for replication
      * traffic to this node.
      *
@@ -621,6 +630,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
             if (isReplication) {
                 numberOfReplicationsLastMin.increment();
             }
+            // 如果已经是复制，则不要再次复制
             // If it is a replication already, do not replicate again as this will create a poison replication
             if (peerEurekaNodes == Collections.EMPTY_LIST || isReplication) {
                 return;
@@ -628,9 +638,11 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
 
             for (final PeerEurekaNode node : peerEurekaNodes.getPeerEurekaNodes()) {
                 // If the url represents this host, do not replicate to yourself.
+                // 不要复制自己
                 if (peerEurekaNodes.isThisMyUrl(node.getServiceUrl())) {
                     continue;
                 }
+                //将所有实例更改复制到对等eureka节点
                 replicateInstanceActionsToPeers(action, appName, id, info, newStatus, node);
             }
         } finally {
@@ -639,6 +651,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     }
 
     /**
+     * 将所有实例更改复制到对等eureka节点
      * Replicates all instance changes to peer eureka nodes except for
      * replication traffic to this node.
      *

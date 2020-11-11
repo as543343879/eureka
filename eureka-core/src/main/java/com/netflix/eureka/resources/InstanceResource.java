@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A <em>jersey</em> resource that handles operations for a particular instance.
- *
+ * 用于处理特定实例的操作。
  * @author Karthik Ranganathan, Greg Kim
  *
  */
@@ -89,7 +89,7 @@ public class InstanceResource {
 
     /**
      * A put request for renewing lease from a client instance.
-     *
+     * 来自客户端实例的续订租约的放置请求。
      * @param isReplication
      *            a header parameter containing information whether this is
      *            replicated from other nodes.
@@ -109,9 +109,11 @@ public class InstanceResource {
             @QueryParam("status") String status,
             @QueryParam("lastDirtyTimestamp") String lastDirtyTimestamp) {
         boolean isFromReplicaNode = "true".equals(isReplication);
+        // 续租
         boolean isSuccess = registry.renew(app.getName(), id, isFromReplicaNode);
 
         // Not found in the registry, immediately ask for a register
+        // 在注册表中找不到，请立即注册
         if (!isSuccess) {
             logger.warn("Not Found (Renew): {} - {}", app.getName(), id);
             return Response.status(Status.NOT_FOUND).build();
@@ -267,6 +269,7 @@ public class InstanceResource {
 
     /**
      * Handles cancellation of leases for this particular instance.
+     * 处理此特定实例的租赁取消。
      *
      * @param isReplication
      *            a header parameter containing information whether this is
@@ -301,16 +304,18 @@ public class InstanceResource {
         if (appInfo != null) {
             if ((lastDirtyTimestamp != null) && (!lastDirtyTimestamp.equals(appInfo.getLastDirtyTimestamp()))) {
                 Object[] args = {id, appInfo.getLastDirtyTimestamp(), lastDirtyTimestamp, isReplication};
-
+                //  请求 的 较大
                 if (lastDirtyTimestamp > appInfo.getLastDirtyTimestamp()) {
                     logger.debug(
                             "Time to sync, since the last dirty timestamp differs -"
                                     + " ReplicationInstance id : {},Registry : {} Incoming: {} Replication: {}",
                             args);
                     return Response.status(Status.NOT_FOUND).build();
+                    // Server 的 较大
                 } else if (appInfo.getLastDirtyTimestamp() > lastDirtyTimestamp) {
                     // In the case of replication, send the current instance info in the registry for the
                     // replicating node to sync itself with this one.
+                    // 如果是复制，请在注册表中为复制节点发送当前实例信息，以使其自身与此实例同步。
                     if (isReplication) {
                         logger.debug(
                                 "Time to sync, since the last dirty timestamp differs -"

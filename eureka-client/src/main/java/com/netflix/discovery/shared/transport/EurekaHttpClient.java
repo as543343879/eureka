@@ -11,7 +11,7 @@ import com.netflix.discovery.shared.Applications;
  * @author Tomasz Bak
  */
 public interface EurekaHttpClient {
-
+    // 注册实例
     EurekaHttpResponse<Void> register(InstanceInfo info);
 
     EurekaHttpResponse<Void> cancel(String appName, String id);
