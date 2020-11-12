@@ -96,7 +96,7 @@ public class ApplicationsResource {
 
     /**
      * Get information about all {@link com.netflix.discovery.shared.Applications}.
-     *
+     *  获取Applications有关所有信息
      * @param version the version of the request.
      * @param acceptHeader the accept header to indicate whether to serve JSON or XML data.
      * @param acceptEncoding the accept header to indicate whether to serve compressed or uncompressed data.
@@ -130,9 +130,11 @@ public class ApplicationsResource {
         // Check if the server allows the access to the registry. The server can
         // restrict access if it is not
         // ready to serve traffic depending on various reasons.
+        //判断是否可以访问
         if (!registry.shouldAllowAccess(isRemoteRegionRequested)) {
             return Response.status(Status.FORBIDDEN).build();
         }
+        // API 版本
         CurrentRequestVersion.set(Version.toEnum(version));
         KeyType keyType = Key.KeyType.JSON;
         String returnMediaType = MediaType.APPLICATION_JSON;
@@ -140,7 +142,7 @@ public class ApplicationsResource {
             keyType = Key.KeyType.XML;
             returnMediaType = MediaType.APPLICATION_XML;
         }
-
+        // 返回数据格式
         Key cacheKey = new Key(Key.EntityType.Application,
                 ResponseCacheImpl.ALL_APPS,
                 keyType, CurrentRequestVersion.get(), EurekaAccept.fromString(eurekaAccept), regions
@@ -161,7 +163,7 @@ public class ApplicationsResource {
 
     /**
      * Get information about all delta changes in {@link com.netflix.discovery.shared.Applications}.
-     *
+     * 获取有关所有增量变化的信息
      * <p>
      * The delta changes represent the registry information change for a period
      * as configured by

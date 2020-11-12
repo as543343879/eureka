@@ -806,6 +806,21 @@ public class DiscoveryClient implements EurekaClient {
         return instanceInfoList.get(index);
     }
 
+    public InstanceInfo getNextServerFromEureka2(String virtualHostname, boolean secure) {
+        InstanceInfo instanceInfo = this.getInstanceInfo();
+        return instanceInfo;
+//        List<InstanceInfo> instanceInfoList = this.getInstanceInfo(
+//                virtualHostname, secure);
+//        if (instanceInfoList == null || instanceInfoList.isEmpty()) {
+//            throw new RuntimeException("No matches for the virtual host name :"
+//                    + virtualHostname);
+//        }
+//        Applications apps = this.localRegionApps.get();
+//        int index = (int) (apps.getNextIndex(virtualHostname,
+//                secure).incrementAndGet() % instanceInfoList.size());
+//        return instanceInfoList.get(index);
+    }
+
     /**
      * Get all applications registered with a specific eureka service.
      *
@@ -1043,6 +1058,7 @@ public class DiscoveryClient implements EurekaClient {
     }
 
     private String getReconcileHashCode(Applications applications) {
+    	// 计数集合 key：应用实例状态
         TreeMap<String, AtomicInteger> instanceCountMap = new TreeMap<String, AtomicInteger>();
         if (isFetchingRemoteRegionRegistries()) {
             for (Applications remoteApp : remoteRegionVsApps.values()) {
@@ -1056,7 +1072,7 @@ public class DiscoveryClient implements EurekaClient {
     /**
      * Gets the full registry information from the eureka server and stores it locally.
      * When applying the full registry, the following flow is observed:
-     *
+     * 从eureka服务器获取完整的注册表信息，并将其存储在本地。 当应用完整注册表时
      * if (update generation have not advanced (due to another thread))
      *   atomically set the registry to the new registry
      * fi
@@ -1092,6 +1108,7 @@ public class DiscoveryClient implements EurekaClient {
 
     /**
      * Get the delta registry information from the eureka server and update it locally.
+     * 从eureka服务器获取增量注册表信息，并在本地进行更新。
      * When applying the delta, the following flow is observed:
      *
      * if (update generation have not advanced (due to another thread))
@@ -1105,23 +1122,27 @@ public class DiscoveryClient implements EurekaClient {
      */
     private void getAndUpdateDelta(Applications applications) throws Throwable {
         long currentUpdateGeneration = fetchRegistryGeneration.get();
-
+        // 增量获取注册信息
         Applications delta = null;
         EurekaHttpResponse<Applications> httpResponse = eurekaTransport.queryClient.getDelta(remoteRegionsRef.get());
         if (httpResponse.getStatusCode() == Status.OK.getStatusCode()) {
             delta = httpResponse.getEntity();
         }
-
+		// 增量同步失败，回滚到全量同步
         if (delta == null) {
             logger.warn("The server does not allow the delta revision to be applied because it is not safe. "
                     + "Hence got the full registry.");
+            // 增量获取为空，全量获取
             getAndStoreFullRegistry();
+            // 增量同步，对比本地缓存和delta信息，更新本地缓存
         } else if (fetchRegistryGeneration.compareAndSet(currentUpdateGeneration, currentUpdateGeneration + 1)) {
             logger.debug("Got delta update with apps hashcode {}", delta.getAppsHashCode());
             String reconcileHashCode = "";
             if (fetchRegistryUpdateLock.tryLock()) {
                 try {
+                	// 将变化的应用集合和本地缓存的应用集合进行合并
                     updateDelta(delta);
+                    // 计算本地的应用集合一致性哈希码
                     reconcileHashCode = getReconcileHashCode(applications);
                 } finally {
                     fetchRegistryUpdateLock.unlock();
@@ -1130,6 +1151,7 @@ public class DiscoveryClient implements EurekaClient {
                 logger.warn("Cannot acquire update lock, aborting getAndUpdateDelta");
             }
             // There is a diff in number of instances for some reason
+	        // 由于某些原因，实例数量有所不同
             if (!reconcileHashCode.equals(delta.getAppsHashCode()) || clientConfig.shouldLogDeltaDiff()) {
                 reconcileAndLogDifference(delta, reconcileHashCode);  // this makes a remoteCall
             }
@@ -1154,6 +1176,7 @@ public class DiscoveryClient implements EurekaClient {
 
     /**
      * Reconcile the eureka server and client registry information and logs the differences if any.
+     * 处理eureka服务器和客户端注册表信息，并记录差异
      * When reconciling, the following flow is observed:
      *
      * make a remote call to the server for the full registry
@@ -1507,7 +1530,9 @@ public class DiscoveryClient implements EurekaClient {
 
             boolean success = fetchRegistry(remoteRegionsModified);
             if (success) {
+            	//  设置 注册信息的应用实例数
                 registrySize = localRegionApps.get().size();
+                // 设置 最后获取注册信息时间
                 lastSuccessfulRegistryFetchTimestamp = System.currentTimeMillis();
             }
 

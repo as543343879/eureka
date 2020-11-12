@@ -24,7 +24,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.EurekaInstanceConfig;
@@ -35,6 +37,7 @@ import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.EurekaClientConfig;
+import com.netflix.discovery.shared.Applications;
 
 /**
  * Sample Eureka client that discovers the example service using Eureka and sends requests.
@@ -68,11 +71,11 @@ public class ExampleEurekaClient {
     public static void injectEurekaConfiguration() throws UnknownHostException {
         String myHostName = InetAddress.getLocalHost().getHostName();
         String myServiceUrl = "http://" + myHostName + ":8080/v2/";
-
+        myServiceUrl = "http://127.0.0.1:8080/v2/" + "," + "http://127.0.0.1:8081/v2/";
         System.setProperty("eureka.region", "default");
-        System.setProperty("eureka.name", "eureka");
+        System.setProperty("eureka.name", "eurekaClient");
 //        System.setProperty("eureka.vipAddress", "eureka.mydomain.net.server");
-        System.setProperty("eureka.port", "8081");
+        System.setProperty("eureka.port", "8082");
 //        System.setProperty("eureka.preferSameZone", "false");
 //        System.setProperty("eureka.shouldUseDns", "false");
 //        System.setProperty("eureka.shouldFetchRegistry", "false");
@@ -86,11 +89,19 @@ public class ExampleEurekaClient {
     public void sendRequestToServiceUsingEureka(EurekaClient eurekaClient) {
         // initialize the client
         // this is the vip address for the example service to talk to as defined in conf/sample-eureka-service.properties
-        String vipAddress = "localhost";
+        String vipAddress = "http://localhost:8080";
 
         InstanceInfo nextServerInfo = null;
         try {
-            nextServerInfo = eurekaClient.getNextServerFromEureka(vipAddress, false);
+
+            Applications applications = eurekaClient.getApplications();
+            System.out.println(applications.getAppsHashCode());
+            Set<String> allKnownRegions = eurekaClient.getAllKnownRegions();
+            System.out.println(Arrays.toString(allKnownRegions.toArray()));
+            Applications aDefault = eurekaClient.getApplicationsForARegion("default");
+            DiscoveryClient discoveryClient = (DiscoveryClient) eurekaClient;
+            nextServerInfo = discoveryClient.getNextServerFromEureka2(vipAddress, false);
+	        nextServerInfo = eurekaClient.getNextServerFromEureka(vipAddress, false);
         } catch (Exception e) {
             System.err.println("Cannot get an instance of example service to talk to from eureka");
             System.exit(-1);
@@ -145,10 +156,8 @@ public class ExampleEurekaClient {
             // create the client
             ApplicationInfoManager applicationInfoManager = initializeApplicationInfoManager(new MyDataCenterInstanceConfig());
             EurekaClient client = initializeEurekaClient(applicationInfoManager, new DefaultEurekaClientConfig());
-
             // use the client
             sampleClient.sendRequestToServiceUsingEureka(client);
-
 
             // shutdown the client
 //            eurekaClient.shutdown();

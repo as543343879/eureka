@@ -226,6 +226,8 @@ public class EurekaClientServerRestIntegrationTest02 {
         System.setProperty("eureka.awsSecretKey", "fake_aws_secret_key");
         System.setProperty("eureka.numberRegistrySyncRetries", "0");
 
+        System.setProperty("eureka.rateLimiter.enabled", "true");
+
 //        System.setProperty("eureka.numberRegistrySyncRetries", "0");
     }
 

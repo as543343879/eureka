@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.InstanceInfo.InstanceStatus;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.shared.resolver.DefaultEndpoint;
 import com.netflix.discovery.shared.transport.EurekaHttpClient;
 import com.netflix.discovery.shared.transport.EurekaHttpResponse;
@@ -218,7 +219,7 @@ public class EurekaClientServerRestIntegrationTest {
 	    myServiceUrl = "http://127.0.0.1:8080/v2/" + "," + "http://127.0.0.1:8081/v2/";
         System.setProperty("eureka.region", "default");
         System.setProperty("eureka.name", "eureka");
-//        System.setProperty("eureka.vipAddress", "eureka.mydomain.net");
+        System.setProperty("eureka.vipAddress", "http://localhost:8080");
         System.setProperty("eureka.port", "8080");
         System.setProperty("eureka.preferSameZone", "false");
         System.setProperty("eureka.shouldUseDns", "false");
@@ -229,6 +230,14 @@ public class EurekaClientServerRestIntegrationTest {
         System.setProperty("eureka.awsAccessId", "fake_aws_access_id");
         System.setProperty("eureka.awsSecretKey", "fake_aws_secret_key");
         System.setProperty("eureka.numberRegistrySyncRetries", "0");
+
+        System.setProperty("eureka.rateLimiter.enabled", "true");
+//       System.setProperty("eureka.rateLimiter.privilegedClients", "DefaultClient");
+       System.setProperty("eureka.rateLimiter.enabled", "true");
+       System.setProperty("eureka.rateLimiter.burstSize", "2");
+       System.setProperty("eureka.rateLimiter.registryFetchAverageRate", "1");
+       System.setProperty("eureka.rateLimiter.fullFetchAverageRate", "1");
+       System.setProperty("eureka.rateLimiter.throttleStandardClients", "false");
 
 //        System.setProperty("eureka.numberRegistrySyncRetries", "0");
     }
