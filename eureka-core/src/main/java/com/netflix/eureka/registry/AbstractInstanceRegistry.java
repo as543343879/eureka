@@ -633,6 +633,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
             // 影响应该均匀地分布在所有应用程序中。
             Random random = new Random(System.currentTimeMillis());
             for (int i = 0; i < toEvict; i++) {
+                // 选择一个随机项目（Knuth随机算法）
                 // Pick a random item (Knuth shuffle algorithm)
                 int next = i + random.nextInt(expiredLeases.size() - i);
                 Collections.swap(expiredLeases, i, next);
