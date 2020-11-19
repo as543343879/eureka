@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * An alternative to {@link String#intern()} with no capacity constraints.
+ *  String#intern() 的替代选择，没有容量限制。
  *
  * @author Tomasz Bak
  */
@@ -31,7 +32,7 @@ public class StringCache {
 
     public String cachedValueOf(final String str) {
         if (str != null && (lengthLimit < 0 || str.length() <= lengthLimit)) {
-            // Return value from cache if available
+            // Return value from cache if available 从缓存返回值（如果有）
             try {
                 lock.readLock().lock();
                 WeakReference<String> ref = cache.get(str);
@@ -42,7 +43,7 @@ public class StringCache {
                 lock.readLock().unlock();
             }
 
-            // Update cache with new content
+            // Update cache with new content 用新内容更新缓存
             try {
                 lock.writeLock().lock();
                 WeakReference<String> ref = cache.get(str);

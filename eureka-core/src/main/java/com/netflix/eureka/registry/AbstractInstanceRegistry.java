@@ -733,6 +733,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
     /**
      * This method will return applications with instances from all passed remote regions as well as the current region.
      * Thus, this gives a union view of instances from multiple regions. <br/>
+     * 此方法将返回具有来自所有传递的远程区域以及当前区域的实例的应用程序。 因此，这给出了来自多个区域的实例的并集视图。
      * The application instances for which this union will be done can be restricted to the names returned by
      * {@link EurekaServerConfig#getRemoteRegionAppWhitelist(String)} for every region. In case, there is no whitelist
      * defined for a region, this method will also look for a global whitelist by passing <code>null</code> to the
@@ -938,6 +939,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
     /**
      * Gets the application delta also including instances from the passed remote regions, with the instances from the
      * local region. <br/>
+     * 获取应用程序增量，其中还包括来自传递的远程区域的实例以及来自本地区域的实例。
      *
      * The remote regions from where the instances will be chosen can further be restricted if this application does not
      * appear in the whitelist specified for the region as returned by
