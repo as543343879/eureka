@@ -237,6 +237,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     @Override
     public void openForTraffic(ApplicationInfoManager applicationInfoManager, int count) {
         // Renewals happen every 30 seconds and for a minute it should be a factor of 2.
+        // 续订每30秒发生一分钟，应为2倍。 应该是以前代码注释
         this.expectedNumberOfClientsSendingRenews = count;
         updateRenewsPerMinThreshold();
         logger.info("Got {} instances from neighboring DS node", count);
@@ -485,6 +486,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     @Override
     public boolean isLeaseExpirationEnabled() {
         if (!isSelfPreservationModeEnabled()) {
+            // 禁用了自我保留模式，因此允许实例过期。
             // The self preservation mode is disabled, hence allowing the instances to expire.
             return true;
         }

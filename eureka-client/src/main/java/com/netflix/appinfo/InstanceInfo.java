@@ -92,6 +92,7 @@ public class InstanceInfo {
     private volatile String instanceId;
 
     private volatile String appName;
+    // 组名
     @Auto
     private volatile String appGroupName;
 
@@ -113,6 +114,7 @@ public class InstanceInfo {
     @Auto
     private volatile String secureHealthCheckUrl;
     @Auto
+    // 虚拟主机名
     private volatile String vipAddress;
     @Auto
     private volatile String secureVipAddress;
